@@ -7,7 +7,7 @@ on:
     types: [created]
 
 jobs:
-  add_label:
+  change_baseBranch_assistance:
     runs-on: ubuntu-latest
     steps:
       - uses: unsplash/comment-on-pr@master
