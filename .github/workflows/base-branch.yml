@@ -1,17 +1,17 @@
 name: change base branch
 
 on:
-  pull_request:
-    types: [opened]
-  issue_comment:
-    types: [created]
+    issue_comment:
+        types: [created]
 
 jobs:
-  change_baseBranch_assistance:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: unsplash/comment-on-pr@master
-        if: ${{ contains(github.event.comment.body, 'base branch') }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr-message: "Hi, this is github bot and I'll assist you if you have any doubts regarding changing the base branch. Refer to this [image](https://media.discordapp.net/attachments/818844424292794448/819192791276060742/Screenshot_20210126-095421__01__01.png?width=884&height=612) to change base branch."
+    change_baseBranch_assistance:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions-ecosystem/action-create-comment@v1
+              if: ${{ startsWith(github.event.comment.body, '/base-branch') }}
+              with:
+                  github_token: ${{ secrets.github_token }}
+                  body: |
+                      Hi @${{ github.actor }}, this is github bot and I'll assist you if you have any doubts regarding changing the base branch of this PR. Refer to this [image](https://media.discordapp.net/attachments/818844424292794448/819192791276060742/Screenshot_20210126-095421__01__01.png?width=884&height=612) for help changing base branch.

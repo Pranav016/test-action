@@ -1,6 +1,9 @@
 name: js-action
 
-on: [push]
+on:
+    push:
+    pull_request:
+        types: [opened, closed, assigned, reopened]
 
 jobs:
     run-js-action:
@@ -13,3 +16,5 @@ jobs:
                   who-to-greet: 'Pranav'
             - name: log greet time
               run: '${{ steps.greet.outputs.time }}'
+            - name: log email
+              run: '${{ github.event.client_payload.commits[0].author.email }}'
