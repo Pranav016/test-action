@@ -1,0 +1,25 @@
+name: terminal-commands-test
+
+on: [push]
+
+jobs:
+    run-shell-commands:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Hello world
+              run: echo "Hello world"
+            - name: multiline scripts
+              run: |
+                  import python
+                  print(platform.processor())
+              shell: python
+    run-windows-commands:
+        runs-on: windows-latest
+        # dependencies for sequential running of jobs
+        needs: ['run-shell-commands']
+        steps:
+            - name: powershell-directory
+              run: Get-Location
+            - name: bash-directory
+              run: pwd
+              shell: bash

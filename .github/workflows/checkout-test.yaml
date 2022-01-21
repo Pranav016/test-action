@@ -1,0 +1,21 @@
+name: test-checkout
+
+on: [push, pull_request]
+
+jobs:
+    run-gh-actions:
+        runs-on: ubuntu-latest
+        steps:
+            - name: List files
+              run: |
+                  pwd
+                  echo $GITHUB_SHA
+                  echo $GITHUB_REPOSITORY
+                  echo $GITHUB_WORKSPACE
+              # echo "${{ github.token }}"
+            - name: checkout
+              uses: actions/checkout@v2
+            - name: files after checkout
+              run: |
+                  pwd
+                  ls -a
