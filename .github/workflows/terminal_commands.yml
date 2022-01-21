@@ -10,7 +10,7 @@ jobs:
               run: echo "Hello world"
             - name: multiline scripts
               run: |
-                  import python
+                  import platform
                   print(platform.processor())
               shell: python
     run-windows-commands:
