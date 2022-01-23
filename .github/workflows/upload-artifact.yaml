@@ -1,0 +1,21 @@
+name: artifact
+
+# on: [pull_request]
+
+jobs:
+    upload-artifact:
+        runs-on: ubuntu-latest
+        steps:
+            - name: upload-artifact
+              uses: actions/upload-artifact@v2
+              with:
+                  name: output-log-file
+                  path: output.log
+    download-artifact:
+        runs-on: ubuntu-latest
+        needs: [upload-artifact]
+        steps:
+            - name: download-artifact
+              uses: actions/download-artifact@v2
+              with:
+                  name: output-log-file
