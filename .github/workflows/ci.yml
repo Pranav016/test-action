@@ -1,0 +1,87 @@
+name: CI
+
+on:
+    pull_request:
+        branches: [develop]
+    push:
+        branches: [develop, master]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        env:
+            SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+            SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }} # command- surge token
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Cache node_modules
+              uses: actions/cache@v1
+              with:
+                  path: ~/.npm # path in ubuntu linux
+                  key: ${{ runner.os }}-cache-key-${{ hashfiles("**/package-lock.json") }}
+                  restore-keys: |
+                      ${{ runner.os }}-cache-key-
+
+            - name: use node js
+              uses: actions/setup-node@v1
+              with:
+                  node-version: '16.x'
+            - run: npm ci
+            - run: npm run lint-check
+            - run: npm test -- --coverage # generate a coverage folder in root
+              env:
+                  CI: true
+
+            - name: Upload test coverage folder
+              uses: actions/upload-artifact@v2
+              with:
+                  name: test-coverage
+                  path: coverage
+
+            - name: Build project
+              if: github.event_name == "push"
+              run: npm run build
+
+            - name: Upload build folder
+              if: github.event_name == "push"
+              uses: actions/upload-artifact@v2
+              with:
+                  name: build
+                  path: build
+
+            - name: zip assets
+              if: github.event_name == "push" && github.ref_name == "master"
+              run: |
+                  zip -r build.zip ./build
+                  zip -r coverage.zip ./coverage
+
+            - name: release version
+              if: github.event_name == "push" && github.ref_name == "master"
+              run: npx semantic-release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }} # generate a personal token
+
+            - name: deploy to staging
+              if: github.event_name == "push" && gtihub.ref_name == "develop"
+              run: npx surge --project ./build --domain <staging domain link>
+
+            - name: deploy to production
+              if: github.event_name == "push" && gtihub.ref_name == "master"
+              run: npx surge --project ./build --domain <production domain link>
+
+            - name: upload coverage to codecov
+              if: github.event_name == "push" && gtihub.ref_name == "master"
+              run: npx codecov
+              env:
+                  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+            - name: Raise issue
+              if: failure() && github.event_name == "pull_request"
+              uses: alialaa/issue-action@v1
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  title: Issue Title
+                  body: Issue Body
+                  assignees: |
+                      ${{github.event.pull_request.user.login}}
